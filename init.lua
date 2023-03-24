@@ -70,8 +70,11 @@ require('lazy').setup({
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
 
+  -- VIM training game
+  'ThePrimeagen/vim-be-good',
+
   -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
+  -- 'tpope/vim-sleuth',
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -147,7 +150,11 @@ require('lazy').setup({
   { 'numToStr/Comment.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
-  { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim' } },
+  { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-live-grep-args.nvim' },
+    config = function()
+      require("telescope").load_extension("live_grep_args")
+    end
+  },
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built.
   -- Only load if `make` is available. Make sure you have the system
@@ -158,7 +165,16 @@ require('lazy').setup({
     --       refer to the README for telescope-fzf-native for more instructions.
     build = 'make',
     cond = function()
-      return vim.fn.executable 'make' == 1
+        return vim.fn.executable 'make' == 1 and vim.loop.os_uname().sysname ~= "Windows_NT"
+    end,
+  },
+
+  -- NOTE(Scott): Windows version that uses cmake. Make sure cmake is installed and in PATH
+  {
+    'nvim-telescope/telescope-fzf-native.nvim',
+    build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build',
+    cond = function()
+        return vim.loop.os_uname().sysname == "Windows_NT"
     end,
   },
 
@@ -230,7 +246,23 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+-- 
+vim.o.tabstop = 4
+vim.o.shiftwidth = 4
+
+--
+vim.o.relativenumber = true
+
 -- [[ Basic Keymaps ]]
+
+-- Override some basic keys to recenter in middle of window
+vim.keymap.set('n', '<C-d>', '<C-d>zz', {noremap = true, silent=true})
+vim.keymap.set('n', '<C-u>', '<C-u>zz', {noremap = true, silent=true})
+vim.keymap.set('n', 'n', 'nzz', {noremap = true, silent=true})
+vim.keymap.set('n', 'N', 'Nzz', {noremap = true, silent=true})
+
+-- Restore text in register after pasting 
+vim.keymap.set('x', '<leader>p', '"_dP', {noremap = true, silent=true})
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
@@ -281,11 +313,18 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
+--vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', '<leader>sg', "lua: require('telescope').extensions.live_grep_args.live_grep_args()<CR>", { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
+
+-- Note(Scott): This requires installing llvm via chocolately 
+if vim.loop.os_uname().sysname == "Windows_NT" then
+    require('nvim-treesitter.install').compilers = { "clang" }
+end
+
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
   ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'help', 'vim' },
@@ -447,6 +486,7 @@ mason_lspconfig.setup_handlers {
     }
   end,
 }
+
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
