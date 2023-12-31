@@ -71,7 +71,7 @@ require('lazy').setup({
   'tpope/vim-rhubarb',
 
   -- VIM training game
-  'ThePrimeagen/vim-be-good',
+  -- 'ThePrimeagen/vim-be-good',
 
   -- Detect tabstop and shiftwidth automatically
   -- 'tpope/vim-sleuth',
@@ -119,7 +119,15 @@ require('lazy').setup({
     'navarasu/onedark.nvim',
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme 'onedark'
+  --    vim.cmd.colorscheme 'onedark'
+    end,
+  },
+
+  { -- Gruvbox Theme 
+    'morhetz/gruvbox',
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme 'gruvbox'
     end,
   },
 
@@ -129,7 +137,8 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        --theme = 'onedark',
+        theme = 'gruvbox',
         component_separators = '|',
         section_separators = '',
       },
@@ -187,6 +196,9 @@ require('lazy').setup({
       pcall(require('nvim-treesitter.install').update { with_sync = true })
     end,
   },
+  -- Building projects
+  'skywind3000/asynctasks.vim',
+  'skywind3000/asyncrun.vim',
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -253,6 +265,9 @@ vim.o.shiftwidth = 4
 --
 vim.o.relativenumber = true
 
+-- Let asymc run open quickfix
+vim.g.asyncrun_open = 6
+
 -- [[ Basic Keymaps ]]
 
 -- Override some basic keys to recenter in middle of window
@@ -271,6 +286,9 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+-- Bind switch clangd header/source to <leader>o
+vim.keymap.set('n', '<leader>o', ':ClangdSwitchSourceHeader<CR>', {noremap=true, silent=true })
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -313,8 +331,8 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
---vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
-vim.keymap.set('n', '<leader>sg', "lua: require('telescope').extensions.live_grep_args.live_grep_args()<CR>", { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
+--vim.keymap.set('n', '<leader>sg', "lua: require('telescope').extensions.live_grep_args.live_grep_args()<CR>", { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
 -- [[ Configure Treesitter ]]
